@@ -1,13 +1,15 @@
 Package: woeR
-Type: Package
-Title: Weight of Evidence based segmentation of a variable
+Title: Weight of Evidence Based Segmentation of a Variable
 Version: 0.1.0
-Author: Kashish Soien <kashish.soien19@gmail.com>
+Author: Kashish Soien
 Maintainer: Kashish Soien <kashish.soien19@gmail.com>
+Description: Segment a numeric variable based on a dichotomous dependent variable by using the weight of evidence (WOE) approach (Ref: Siddiqi, N. (2006) <doi:10.1002/9781119201731.biblio>).
+    The underlying algorithm adopts a recursive approach to create segments that are diverse in respect of their WOE values and meet the demands of user-defined parameters.The algorithm also aims to maintain a monotonic trend in WOE values of consecutive segments. As such, it can be particularly helpful in improving robustness of linear and logistic regression models.
+Imports: dplyr
+Suggests: smbinning
+Depends: R (>= 3.4.2)
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-Depends: dplyr
-Suggests: smbinning
 RoxygenNote: 6.0.1
-Description: woeR package helps you create homogenous segmentations of a variable based on a target variable.
+BugReports: https://github.com/kraken19/woeR/issues

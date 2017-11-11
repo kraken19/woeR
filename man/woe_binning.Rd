@@ -5,7 +5,7 @@
 \title{Weight of Evidence based segmentation of a variable}
 \usage{
 woe_binning(df, variable, dv, min_perc = 0.02, initial_bins = 50,
-  woe_cutoff = 0.05)
+  woe_cutoff = 0.1)
 }
 \arguments{
 \item{df}{A data frame containing input arguments - variable & dv}
@@ -18,7 +18,7 @@ woe_binning(df, variable, dv, min_perc = 0.02, initial_bins = 50,
 
 \item{initial_bins}{No of segments of the variable to be created in the 1st iteration. Default value = 50(2 percent) for sample size > 1500. Acceptable values are in the range 5-100}
 
-\item{woe_cutoff}{Minimum absolute difference in woe values  between consecutive segments. If the difference is less than this threshold segments are merged. Acceptable values are in the range 0-0.01}
+\item{woe_cutoff}{Thereshold of the absolute difference in woe values between consecutive segments. If the difference is less than this threshold segments are merged. Acceptable values are in the range 0-0.2}
 }
 \value{
 Output is a list containing the following elements : \cr
@@ -29,11 +29,14 @@ d) woe - woe table for the final iteration \cr
 e) IV - Information Value for the final iteration
 }
 \description{
-woeR packages helps you provide homogenous segmentations of a numeric variable based on a target variable.
+Create heterogeneous segmentations of a numeric variable based on a dependent variable using Weight of Evidence approach
+}
+\details{
+Weight of Evidence represents the natural log of the ratio of percent of 0's in the segment to percent of 1's in the segment. It is a proxy for how far the dv rate for a segment is from the sample dv rate (# of 1s/# of observations).
 }
 \examples{
 library(smbinning)
 data("chileancredit")
-woe_binning(chileancredit, "CuDDAmtAvg12M", "FlagGB")
+woe_binning(chileancredit, "CuDDAmtAvg12M", "FlagGB", initial_bins = 10)
 
 }

@@ -1,7 +1,21 @@
 
-## Re-write this
+# 1b.
+mark_bins <- function(woe, woe_cutoff = 0.1, min_perc)
+  {
+    #print(woe_cutoff)
+    woe <- woe %>%
+            mutate(woe_next = lead(woe),
+                   woe_change = abs((woe_next-woe)),
+                   max_cum = cummax(woe),
+                   check = max_cum != woe
+                   )
+    #woe$percent < 0.05 ; removed this condition since initial_bins = no of rows/50
+    woe$conditions <- ifelse(woe$woe_change < woe_cutoff | woe$check | woe$percent < min_perc, 1, 0)
+    woe$conditions[is.na(woe$conditions)] <- 0
+    return(woe$conditions)
+  }
 
-recursive_woe <- function(df, variable, dv, woe , breaks , woe_cutoff = 0.05 , min_perc) {
+recursive_woe <- function(df, variable, dv, woe , breaks , woe_cutoff = 0.1 , min_perc) {
   # Mark bins to merge
   woe$conditions <- mark_bins(woe, woe_cutoff = woe_cutoff, min_perc = min_perc)
   if(nrow(woe) == 2 | sum(woe$conditions) == 0) return(breaks)

@@ -1,7 +1,7 @@
 
 #' @title Weight of Evidence based segmentation of a variable
 #'
-#' @description woeR packages helps you provide homogenous segmentations of a numeric variable based on a target variable.
+#' @description Create heterogeneous segmentations of a numeric variable based on a dependent variable using Weight of Evidence approach
 #'
 #' @param df  A data frame containing input arguments - variable & dv
 #'
@@ -13,7 +13,7 @@
 #'
 #' @param initial_bins No of segments of the variable to be created in the 1st iteration. Default value = 50(2 percent) for sample size > 1500. Acceptable values are in the range 5-100
 #'
-#' @param woe_cutoff Minimum absolute difference in woe values  between consecutive segments. If the difference is less than this threshold segments are merged. Acceptable values are in the range 0-0.01
+#' @param woe_cutoff Thereshold of the absolute difference in woe values between consecutive segments. If the difference is less than this threshold segments are merged. Acceptable values are in the range 0-0.2
 #'
 #' @return Output is a list containing the following elements : \cr
 #' a) variable - value of the input argument 'variable' \cr
@@ -22,16 +22,18 @@
 #' d) woe - woe table for the final iteration \cr
 #' e) IV - Information Value for the final iteration
 #'
+#' @details Weight of Evidence represents the natural log of the ratio of percent of 0's in the segment to percent of 1's in the segment. It is a proxy for how far the dv rate for a segment is from the sample dv rate (# of 1s/# of observations).
+#'
 #' @examples library(smbinning)
 #' data("chileancredit")
-#' woe_binning(chileancredit, "CuDDAmtAvg12M", "FlagGB")
+#' woe_binning(chileancredit, "CuDDAmtAvg12M", "FlagGB", initial_bins = 10)
 #'
 #' @export woe_binning
 #'
 #' @import "dplyr"
 
-woe_binning <- function(df, variable, dv, min_perc = 0.02, initial_bins = 50, woe_cutoff = 0.05){
-
+woe_binning <- function(df, variable, dv, min_perc = 0.02, initial_bins = 50, woe_cutoff = 0.1){
+  #print(woe_cutoff)
   # Check input arguments have been supplied
   if (missing(df) == TRUE || missing(variable) == TRUE || missing(dv) == TRUE) {
     stop("One of the following input parameters is missing with no default: df/variable/dv.")
@@ -59,9 +61,9 @@ woe_binning <- function(df, variable, dv, min_perc = 0.02, initial_bins = 50, wo
   if (!(max(df[, dv], na.rm = T) == 1 & min(df[, dv], na.rm = T) == 0)) {
     stop("Incorrect parameter specification. Argument dv can only contain 0,1 values excluding NA.")
   }
-  if (woe_cutoff < 0 | woe_cutoff > 0.1 | !is.numeric(woe_cutoff)) {
-    warning("Incorrect parameter specification; accepted woe_cutoff parameter range is 0-0.1. Parameter was set to 0.05.")
-    woe_cutoff = 0.05
+  if (woe_cutoff < 0 | woe_cutoff > 0.2 | !is.numeric(woe_cutoff)) {
+    warning("Incorrect parameter specification; accepted woe_cutoff parameter range is 0-0.2. Parameter was set to 0.1.")
+    woe_cutoff = 0.1
   }
   if (nrow(df) <= 1500) {
     initial_bins <- max(5, floor(nrow(df)/30))
@@ -88,7 +90,7 @@ woe_binning <- function(df, variable, dv, min_perc = 0.02, initial_bins = 50, wo
 #  stop("Function handles only interger/numeric class.")
 #      }
 
-woe_binning1 <- function(df, variable, dv, min_perc = 0.02, initial_bins = 50, woe_cutoff = 0.05){
+woe_binning1 <- function(df, variable, dv, min_perc = 0.02, initial_bins = 50, woe_cutoff = 0.1){
 
   df <- df[!is.na(df[, dv]), ] %>% data.frame
   # Boundary checks on Variable distribution
