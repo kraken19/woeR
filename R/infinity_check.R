@@ -1,6 +1,6 @@
 
 # Checking infinity cases
-infinity_check <- function(woe, inf_rows, breaks, dv, variable){
+infinity_check <- function(df, woe, inf_rows, breaks, dv, variable){
     woe_merged <- list()
     ## Handle cases when rows to merge is = 1 or last row - remove these rows and check if output has 1 or last row -1
     boundary_cases <- is.na(
@@ -54,6 +54,6 @@ infinity_check <- function(woe, inf_rows, breaks, dv, variable){
       }else {
           #print(3)
           if(max(inf_rows) == (length(breaks)-1) ) inf_rows[which.max(inf_rows)] <- inf_rows[which.max(inf_rows)] - 1
-          return(infinity_check(woe, inf_rows, breaks, dv, variable))
+          return(infinity_check(df, woe, inf_rows, breaks, dv, variable))
         }
 }

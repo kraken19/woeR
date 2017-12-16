@@ -26,7 +26,7 @@
 #'
 #' @examples library(smbinning)
 #' data("chileancredit")
-#' woe_binning(chileancredit, "CuDDAmtAvg12M", "FlagGB", initial_bins = 10)
+#' woe_binning(chileancredit, "cbs1", "fgood", initial_bins = 10)
 #'
 #' @export woe_binning
 #'
@@ -50,21 +50,29 @@ woe_binning <- function(df, variable, dv, min_perc = 0.02, initial_bins = 50, wo
   if (is.na(which(names(df) == variable)[1]) | is.na(which(names(df) == dv)[1]) ) {
     stop("Parameters variable/dv not found in the datatset.")
   }
+  # Converting tibbles/data tables to data frame & removing NA's from dv
+  # Check if df has rows after removing NA from dv
+  df <- df[!is.na(df[, dv]), ] %>% data.frame
+  if (nrow(df) == 0) {
+    stop("Parameter dv has only NAs.")
+  }
   # Boundary checks on dv
   if (!class(df[, dv]) %in% c("numeric", "integer")) {
     stop("Incorrect parameter specification. Argument dv is not numeric/integer.")
   }
   # Check dv has two distinct values
-  if (!(length(unique(df[, dv][!is.na(df[, dv])])) == 2)) {
+  if (!(length(unique(df[, dv])) == 2)) {
     stop("Incorrect parameter specification. Dependent variable must have two distinct values excluding NAs.")
   }
   if (!(max(df[, dv], na.rm = T) == 1 & min(df[, dv], na.rm = T) == 0)) {
     stop("Incorrect parameter specification. Argument dv can only contain 0,1 values excluding NA.")
   }
+  # Boundary checks on woe_cutoff
   if (woe_cutoff < 0 | woe_cutoff > 0.2 | !is.numeric(woe_cutoff)) {
     warning("Incorrect parameter specification; accepted woe_cutoff parameter range is 0-0.2. Parameter was set to 0.1.")
     woe_cutoff = 0.1
   }
+  # Boundary checks on initial_bins
   if (nrow(df) <= 1500) {
     initial_bins <- max(5, floor(nrow(df)/30))
     print(paste0("Dataset is small (<= 1500 rows). Parameter initial_bins was set to ", initial_bins, "."))
@@ -73,12 +81,12 @@ woe_binning <- function(df, variable, dv, min_perc = 0.02, initial_bins = 50, wo
     warning("Incorrect parameter specification; accepted initial_bins parameter range is 5-100. Parameter was set to 50.")
     initial_bins <- 50
   }
+  # Boundary checks on min_perc
   if (min_perc < 0.01 | min_perc > 0.2 | !is.numeric(min_perc)) {
     warning("Incorrect parameter specification; accepted min_perc parameter range is 0.01-0.2. Parameter was set to 0.05.")
     min_perc = 0.05
   }
-  ## Calling the function associated with the variable class
-  #UseMethod("woe_binning", df[,variable])
+
   if (class(df[, variable]) %in% c("numeric", "integer")) {
     return(woe_binning1(df, variable, dv, min_perc, initial_bins, woe_cutoff))
   } else {
@@ -92,7 +100,6 @@ woe_binning <- function(df, variable, dv, min_perc = 0.02, initial_bins = 50, wo
 
 woe_binning1 <- function(df, variable, dv, min_perc = 0.02, initial_bins = 50, woe_cutoff = 0.1){
 
-  df <- df[!is.na(df[, dv]), ] %>% data.frame
   # Boundary checks on Variable distribution
   check <- boundary_checks(df, variable)
   if (!is.null(check)) {
@@ -116,7 +123,7 @@ woe_binning1 <- function(df, variable, dv, min_perc = 0.02, initial_bins = 50, w
   if (length(inf_rows)){
     #print(inf_rows)
     # Merging bins with WOE = Inf
-    x <- infinity_check(woe, inf_rows, breaks, dv, variable)
+    x <- infinity_check(df, woe, inf_rows, breaks, dv, variable)
     woe <- x$woe
     breaks <- x$breaks
     rm(x)

@@ -20,7 +20,7 @@ This function applies the binning generated from woe_binning to new data
 \examples{
 library(smbinning)
 data("chileancredit")
-\dontrun{woe_object <- woe_binning(chileancredit, "CuDDAmtAvg12M", "FlagGB", initial_bins = 10)
+\dontrun{woe_object <- woe_binning(chileancredit, "cbs1", "fgood", initial_bins = 10)
 out <- apply_woe(chileancredit, woe_object)
 #Above example to create and apply woe segmentation }
 
