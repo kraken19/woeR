@@ -108,7 +108,7 @@ woe_binning1 <- function(df, variable, dv, min_perc = 0.02, initial_bins = 50, w
   # Computing breaks
   #print(initial_bins)
   breaks <- unique(stats::quantile(df[, variable] , probs = seq(0,1,1/initial_bins) , na.rm=T))
-  breaks[initial_bins + 1] <- Inf
+  breaks[length(breaks)] <- Inf
   breaks[1] <- -Inf
   # Compute woe & IV table
   woe <- compute_woe(df = df, variable = variable, dv = dv, breaks = breaks)
