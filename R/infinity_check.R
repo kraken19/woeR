@@ -1,7 +1,7 @@
 
 # Checking infinity cases
 infinity_check <- function(df, woe, inf_rows, breaks, dv, variable){
-    woe_merged <- list()
+    woe_merged <- c()
     ## Handle cases when rows to merge is = 1 or last row - remove these rows and check if output has 1 or last row -1
     boundary_cases <- is.na(
                             c(match(1, inf_rows),
@@ -9,38 +9,29 @@ infinity_check <- function(df, woe, inf_rows, breaks, dv, variable){
                               )
                             )
     if (!boundary_cases[1] ){
-        woe_merged <- list( woe_merged,
-                            woe[1:2,] %>%
-                            summarise(good_percent = sum(good_percent),
-                                      bad_percent = sum(bad_percent) ) %>%
-                            mutate(rank = 1,
-                                   woe = log(good_percent/bad_percent),
-                                   IV = (good_percent - bad_percent)*woe )
-                          )
+        woe_merged <- c(woe_merged, 1)
         inf_rows <- inf_rows[-1]
     }
     if (!boundary_cases[2] ){
-        woe_merged <- list( woe_merged,
-                            woe[c(length(breaks)-1, length(breaks)-2), ] %>%
-                            summarise(good_percent = sum(good_percent),
-                                      bad_percent = sum(bad_percent) ) %>%
-                            mutate(rank = 1,
-                                   woe = log(good_percent/bad_percent),
-                                   IV = (good_percent - bad_percent)*woe )
-                          )
+        woe_merged <- c(woe_merged, length(breaks) - 2)
         inf_rows <- inf_rows[-length(inf_rows)]
     }
     rm(boundary_cases)
     # Merge bins with woe = infinity
-    woe_merged <- list(woe_merged,
-                       lapply(inf_rows, function(z, woe) return(max_iv( woe[c(z-1,z, z+1), ] ) ), woe = woe )
-                      )
-    woe_merged <-
-      do.call(rbind, lapply(woe_merged[[-1]], data.frame)) %>% unique %>% select(rank)
+    ## Add if check -> inf_rows is not null, Use append here
+    if (length(inf_rows)){
+        rows <-
+          lapply(inf_rows, function(z, woe) return(max_iv( woe[c(z-1,z, z+1), ] ) ), woe = woe ) %>%
+          lapply(data.frame)
+        rows <- do.call(rbind, rows)
+        woe_merged <- c(woe_merged, rows$rank) %>% unique
+        rm(rows)
+    }
     #print(woe_merged$rank)
     # What if consecutive rows are Inf? How to handle such cases - Modifying breaks for it
-    breaks <- breaks[-(woe_merged$rank+1)]
+    breaks <- breaks[-(woe_merged+1)]
     # Re-computing woe table
+    ## Next iteration -> Use woe_merged to change woe table instead of compute_woe function #15 Mar18
     woe <- compute_woe(df = df, variable = variable, dv = dv, breaks = breaks)
     #print(0)
     # Re-computing inf_rows
